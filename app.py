@@ -117,7 +117,13 @@ def format_class_name(name):
 
 
 def main():
-    st.title("🍽️ NutriScan")
+    st.markdown(
+        '<div style="display:flex; align-items:baseline; gap:0.6rem;">'
+        '<span style="font-size:2.25rem; font-weight:700; line-height:1;">NutriScan</span>'
+        '<span style="font-size:1.125rem; font-weight:400; color:#808495;">by: Gan CM</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
     st.caption("Photo in. Meal logged. — take or upload a photo of your food.")
 
     classifier = load_classifier()
