@@ -77,8 +77,13 @@ def detect_food_box(pil_img):
     try:
         result = subprocess.run(
             [sys.executable, DETECT_WORKER_PATH, tmp_path],
-            capture_output=True, text=True, timeout=30, check=True,
+            capture_output=True, text=True, timeout=60, check=False,
         )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Detection worker failed (exit {result.returncode}).\n"
+                f"--- stderr ---\n{result.stderr}\n--- stdout ---\n{result.stdout}"
+            )
         data = json.loads(result.stdout.strip().splitlines()[-1])
     finally:
         os.remove(tmp_path)

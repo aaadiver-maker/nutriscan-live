@@ -16,6 +16,13 @@ Prints one JSON line to stdout: {"box": [x1,y1,x2,y2] | null, "label": str | nul
 import json
 import os
 import sys
+import tempfile
+
+# Must be set before `import ultralytics` - on locked-down hosting (e.g.
+# Streamlit Community Cloud) the default ~/.config location it tries to
+# write settings.json to can be read-only, which raises before detection
+# ever runs. Point it at a directory we know is writable instead.
+os.environ.setdefault("YOLO_CONFIG_DIR", tempfile.gettempdir())
 
 YOLO_WEIGHTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "yolov8n.pt")
 CONF_THRESHOLD = 0.25
