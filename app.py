@@ -40,6 +40,28 @@ DEFAULT_CLASS_NAMES = [
 
 DETECT_WORKER_PATH = os.path.join(os.path.dirname(__file__), "detect_worker.py")
 
+# Reference lookup, NOT a model output - the classifier predicts food type
+# only. Approximate kcal per typical single serving (USDA-style estimates).
+CALORIE_MAP = {
+    "apple_pie": (296, "1 slice, ~125g"),
+    "chocolate_cake": (371, "1 slice, ~95g"),
+    "donuts": (253, "1 glazed donut"),
+    "falafel": (333, "1 serving, ~4 pieces"),
+    "french_fries": (365, "1 medium serving"),
+    "hot_dog": (290, "1 hot dog with bun"),
+    "ice_cream": (207, "1/2 cup"),
+    "nachos": (346, "1 serving with cheese"),
+    "onion_rings": (411, "1 serving, ~8 rings"),
+    "pancakes": (350, "1 stack, 3 pancakes"),
+    "pizza": (285, "1 slice"),
+    "ravioli": (330, "1 cup, cheese-filled"),
+    "samosa": (262, "1 samosa"),
+    "spring_rolls": (150, "1 roll, fried"),
+    "strawberry_shortcake": (344, "1 slice"),
+    "tacos": (226, "1 taco"),
+    "waffles": (218, "1 waffle"),
+}
+
 
 @st.cache_resource(show_spinner="Loading NutriScan classifier...")
 def load_classifier():
@@ -181,6 +203,13 @@ def main():
             top_conf = float(probs[top_idx])
 
             st.metric(top_name, f"{top_conf:.0%} confidence")
+
+            calorie_info = CALORIE_MAP.get(class_names[top_idx])
+            if calorie_info:
+                kcal, serving = calorie_info
+                st.markdown(f"**~{kcal} kcal** <span style='color:#808495;'>({serving}, estimated)</span>", unsafe_allow_html=True)
+            else:
+                st.caption("Calorie estimate not available for this food type.")
 
             order = np.argsort(probs)[::-1][:3]
             st.caption("Top 3 guesses")
