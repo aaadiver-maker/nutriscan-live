@@ -226,15 +226,27 @@ def main():
             background-color: #4A6FA1 !important;
         }
         /* Real (fast) buttons used as the click target for switching icons,
-           styled invisible so only the icon image above them is seen. */
+           absolutely positioned to cover the icon image exactly so the
+           whole icon is clickable, not just an invisible strip below it. */
+        [data-testid="stVerticalBlock"]:has(.st-key-select_upload),
+        [data-testid="stVerticalBlock"]:has(.st-key-select_camera) {
+            position: relative;
+        }
+        .st-key-select_upload, .st-key-select_camera {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
         .st-key-select_upload button, .st-key-select_camera button {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             background-color: transparent !important;
             border: none !important;
             color: transparent !important;
-            height: 1.4rem !important;
-            min-height: 1.4rem !important;
-            padding: 0 !important;
-            margin-top: -0.5rem;
         }
         </style>
         """,
