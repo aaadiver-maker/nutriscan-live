@@ -220,6 +220,23 @@ def main():
             background-color: #F1F4F8;
             border-radius: 8px;
         }
+        /* Give the upload dropzone the same footprint as the camera
+           widget, which is naturally much taller (it reserves space for
+           a video preview) - without this the two panels jump size
+           dramatically depending on which mode is active. */
+        [data-testid="stFileUploaderDropzone"] {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        [data-testid="stCameraInput"] {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
         /* Target the fill bar specifically (role=progressbar), not its
            track wrapper - targeting the wrapper paints the whole bar solid
            regardless of actual percentage and swallows the label text. */
