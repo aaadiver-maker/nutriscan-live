@@ -364,34 +364,40 @@ def main():
     with st.spinner("Finding the food in your photo..."):
         box, coco_label, det_conf, source = detect_food_box(image)
 
+    crop = image.crop(box) if box is not None else image
+
+    # Classification runs before either column is drawn, so the bounding
+    # box can be labeled with the actual identified food (e.g. "Hot Dog
+    # 100%") instead of the generic detector's own guess (e.g. "donut
+    # 0.38") - the detector only knows 80 generic COCO categories and is
+    # sometimes wrong about WHAT it found, even when the box location
+    # itself is fine. The real answer always comes from the classifier.
+    top_name, top_conf, probs = None, None, None
+    if classifier is not None:
+        with st.spinner("Identifying the food..."):
+            batch = preprocess_for_classifier(crop)
+            probs = classifier.predict(batch, verbose=0)[0]
+        top_idx = int(np.argmax(probs))
+        top_name = format_class_name(class_names[top_idx])
+        top_conf = float(probs[top_idx])
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Your photo")
         if box is not None:
-            st.image(draw_box(image, box, coco_label, det_conf), use_container_width=True)
+            box_label = top_name if top_name is not None else coco_label
+            box_conf = top_conf if top_conf is not None else det_conf
+            st.image(draw_box(image, box, box_label, box_conf), use_container_width=True)
             st.caption(f"Located automatically (detector confidence {det_conf:.0%}).")
-            st.caption(
-                "This box just shows where the food is, not what it is. "
-                "The food name on the right comes from a second, more accurate check."
-            )
         else:
             st.image(image, use_container_width=True)
             st.caption("Analyzed the full photo directly. No crop was needed for this one.")
-
-    crop = image.crop(box) if box is not None else image
 
     with col2:
         st.subheader("Result")
         if classifier is None:
             st.error("Classifier not loaded. See warning above.")
         else:
-            with st.spinner("Identifying the food..."):
-                batch = preprocess_for_classifier(crop)
-                probs = classifier.predict(batch, verbose=0)[0]
-            top_idx = int(np.argmax(probs))
-            top_name = format_class_name(class_names[top_idx])
-            top_conf = float(probs[top_idx])
-
             st.metric(top_name, f"{top_conf:.0%} confidence")
 
             nutrition_info = NUTRITION_MAP.get(class_names[top_idx])
