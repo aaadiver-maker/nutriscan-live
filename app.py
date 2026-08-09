@@ -339,8 +339,13 @@ def main():
                 if cam_file is not None:
                     image = Image.open(cam_file)
 
+        if image is None:
+            # Rendered inside picker_col too, so it lines up with the same
+            # narrow width as everything else above instead of stretching
+            # full page width on its own.
+            st.info("Waiting for a photo...")
+
     if image is None:
-        st.info("Waiting for a photo...")
         return
 
     if not st.session_state.has_photo:
