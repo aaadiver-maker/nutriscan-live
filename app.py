@@ -293,46 +293,51 @@ def main():
     if "input_mode" not in st.session_state:
         st.session_state.input_mode = "upload"
 
-    # Buttons are processed FIRST, before either icon is drawn, so the
-    # active-state border reflects this click immediately rather than
-    # lagging a run behind - Streamlit executes top-to-bottom in one pass,
-    # so rendering an icon's border before checking whether ITS OWN or the
-    # OTHER icon's button was just clicked would use last run's state.
-    # Narrow columns so the two icons sit close together on the left instead
-    # of each being centered in its own half of the full page width, which
-    # left a large empty gap between them.
-    icon_col1, icon_col2, _icon_spacer = st.columns([1, 1, 4])
-    with icon_col1:
-        upload_slot = st.empty()
-        if st.button(" ", key="select_upload", use_container_width=True):
-            st.session_state.input_mode = "upload"
-    with icon_col2:
-        camera_slot = st.empty()
-        if st.button(" ", key="select_camera", use_container_width=True):
-            st.session_state.input_mode = "camera"
-
-    with upload_slot:
-        render_icon(UPLOAD_ICON_PATH, st.session_state.input_mode == "upload")
-    with camera_slot:
-        render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
-
     if "has_photo" not in st.session_state:
         st.session_state.has_photo = False
 
     image = None
-    # Once a photo has already been provided, collapse the (fairly large)
-    # upload/camera widget behind a "+" expander instead of leaving it open
-    # above the result - otherwise the result gets pushed far down the page
-    # every time, underneath a widget the user is already done with.
-    with st.expander("➕ Add a photo", expanded=not st.session_state.has_photo):
-        if st.session_state.input_mode == "upload":
-            up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
-            if up_file is not None:
-                image = Image.open(up_file)
-        else:
-            cam_file = st.camera_input("Point at your meal")
-            if cam_file is not None:
-                image = Image.open(cam_file)
+    # Keep the whole picker (icons + upload/camera widget) in a narrower
+    # left column instead of spanning the full page width - both the icon
+    # row and the uploader/camera box looked stretched and oversized
+    # otherwise, especially compared to the compact icons.
+    picker_col, _picker_spacer = st.columns([2, 1])
+    with picker_col:
+        # Buttons are processed FIRST, before either icon is drawn, so the
+        # active-state border reflects this click immediately rather than
+        # lagging a run behind - Streamlit executes top-to-bottom in one
+        # pass, so rendering an icon's border before checking whether ITS
+        # OWN or the OTHER icon's button was just clicked would use last
+        # run's state.
+        icon_col1, icon_col2, _icon_spacer = st.columns([1, 1, 2])
+        with icon_col1:
+            upload_slot = st.empty()
+            if st.button(" ", key="select_upload", use_container_width=True):
+                st.session_state.input_mode = "upload"
+        with icon_col2:
+            camera_slot = st.empty()
+            if st.button(" ", key="select_camera", use_container_width=True):
+                st.session_state.input_mode = "camera"
+
+        with upload_slot:
+            render_icon(UPLOAD_ICON_PATH, st.session_state.input_mode == "upload")
+        with camera_slot:
+            render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
+
+        # Once a photo has already been provided, collapse the (fairly
+        # large) upload/camera widget behind a "+" expander instead of
+        # leaving it open above the result - otherwise the result gets
+        # pushed far down the page every time, underneath a widget the
+        # user is already done with.
+        with st.expander("➕ Add a photo", expanded=not st.session_state.has_photo):
+            if st.session_state.input_mode == "upload":
+                up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
+                if up_file is not None:
+                    image = Image.open(up_file)
+            else:
+                cam_file = st.camera_input("Point at your meal")
+                if cam_file is not None:
+                    image = Image.open(cam_file)
 
     if image is None:
         st.info("Waiting for a photo...")
