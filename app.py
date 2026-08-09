@@ -212,7 +212,7 @@ def main():
                 st.caption("Calorie estimate not available for this food type.")
 
             order = np.argsort(probs)[::-1][:3]
-            st.caption("Top 3 guesses")
+            st.caption("Other possibilities")
             for i in order:
                 st.progress(float(probs[i]), text=f"{format_class_name(class_names[i])} — {probs[i]:.0%}")
 
