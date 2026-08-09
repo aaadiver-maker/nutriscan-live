@@ -32,6 +32,7 @@ UPLOAD_ICON_PATH = os.path.join(ICON_DIR, "upload_icon.png")
 CAMERA_ICON_PATH = os.path.join(ICON_DIR, "camera_icon.png")
 
 IMG_SIZE = (224, 224)
+ACCENT_COLOR = "#4A6FA1"
 
 # Fallback only - matches Milestone 1's `sorted(os.listdir(data_root))`.
 # Overridden automatically if model/label_map.json is present.
@@ -167,16 +168,22 @@ def format_class_name(name):
 
 
 @st.cache_data
-def get_base64_icon(path):
+def get_base64_icon(path, _mtime):
+    # `_mtime` is part of the cache key purely so a changed icon file busts
+    # the cache automatically - without it, a git-pushed asset swap under the
+    # same filename kept serving the old cached image after a hot reload,
+    # since st.cache_data only keys on the arguments passed in, not on
+    # whether the file's contents actually changed.
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
 
-def clickable_icon(path, mode):
-    b64 = get_base64_icon(path)
+def clickable_icon(path, mode, active):
+    b64 = get_base64_icon(path, os.path.getmtime(path))
+    border = f"3px solid {ACCENT_COLOR}" if active else "3px solid transparent"
     st.markdown(
         f'<a href="?mode={mode}" target="_self" class="nutriscan-icon-link">'
-        f'<img src="data:image/png;base64,{b64}"></a>',
+        f'<img src="data:image/png;base64,{b64}" style="border:{border};"></a>',
         unsafe_allow_html=True,
     )
 
@@ -217,12 +224,6 @@ def main():
         [data-testid="stProgress"] div[role="progressbar"] {
             background-color: #4A6FA1 !important;
         }
-        button[kind="primary"] p, button[kind="primary"] span {
-            color: #FFFFFF !important;
-        }
-        button[kind="secondary"] p, button[kind="secondary"] span {
-            color: #1E293B !important;
-        }
         .nutriscan-icon-link img {
             width: 100%;
             cursor: pointer;
@@ -261,19 +262,9 @@ def main():
 
     icon_col1, icon_col2 = st.columns(2)
     with icon_col1:
-        clickable_icon(UPLOAD_ICON_PATH, "upload")
-        if st.button(
-            "Upload a photo", use_container_width=True,
-            type="primary" if st.session_state.input_mode == "upload" else "secondary",
-        ):
-            st.session_state.input_mode = "upload"
+        clickable_icon(UPLOAD_ICON_PATH, "upload", st.session_state.input_mode == "upload")
     with icon_col2:
-        clickable_icon(CAMERA_ICON_PATH, "camera")
-        if st.button(
-            "Take a photo", use_container_width=True,
-            type="primary" if st.session_state.input_mode == "camera" else "secondary",
-        ):
-            st.session_state.input_mode = "camera"
+        clickable_icon(CAMERA_ICON_PATH, "camera", st.session_state.input_mode == "camera")
 
     image = None
     if st.session_state.input_mode == "upload":
