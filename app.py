@@ -173,24 +173,25 @@ def main():
             font-family: Cambria, Georgia, serif !important;
             color: #1E293B !important;
         }
-        p, span, label, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
+        /* Scoped to actual st.caption() elements only - an earlier version of
+           this rule targeted plain p/span/label globally, which also dimmed
+           text inside buttons and progress bars to the point of being
+           unreadable. Keep this narrow. */
+        [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
             color: #64748B;
         }
         [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
             font-family: Cambria, Georgia, serif;
             color: #1E293B;
         }
-        [data-testid="stTabs"] button[aria-selected="true"] p {
-            color: #4A6FA1 !important;
-        }
-        [data-testid="stTabs"] button[aria-selected="true"] {
-            border-bottom-color: #4A6FA1 !important;
-        }
         [data-testid="stAlertContainer"] {
             background-color: #F1F4F8;
             border-radius: 8px;
         }
-        [data-testid="stProgress"] > div > div {
+        /* Target the fill bar specifically (role=progressbar), not its
+           track wrapper - targeting the wrapper paints the whole bar solid
+           regardless of actual percentage and swallows the label text. */
+        [data-testid="stProgress"] div[role="progressbar"] {
             background-color: #4A6FA1 !important;
         }
         button[kind="primary"] p, button[kind="primary"] span {
