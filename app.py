@@ -189,7 +189,7 @@ def render_icon(path, active):
     st.markdown(
         f'<div style="display:flex; justify-content:center;">'
         f'<img src="data:image/png;base64,{b64}" '
-        f'style="width:100%; max-width:180px; border:{border}; border-radius:8px;"></div>',
+        f'style="width:100%; max-width:90px; border:{border}; border-radius:8px;"></div>',
         unsafe_allow_html=True,
     )
 
@@ -313,19 +313,37 @@ def main():
     with camera_slot:
         render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
 
+    if "has_photo" not in st.session_state:
+        st.session_state.has_photo = False
+
     image = None
-    if st.session_state.input_mode == "upload":
-        up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
-        if up_file is not None:
-            image = Image.open(up_file)
-    else:
-        cam_file = st.camera_input("Point at your meal")
-        if cam_file is not None:
-            image = Image.open(cam_file)
+    # Once a photo has already been provided, collapse the (fairly large)
+    # upload/camera widget behind a "+" expander instead of leaving it open
+    # above the result - otherwise the result gets pushed far down the page
+    # every time, underneath a widget the user is already done with.
+    with st.expander("➕ Add a photo", expanded=not st.session_state.has_photo):
+        if st.session_state.input_mode == "upload":
+            up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
+            if up_file is not None:
+                image = Image.open(up_file)
+        else:
+            cam_file = st.camera_input("Point at your meal")
+            if cam_file is not None:
+                image = Image.open(cam_file)
 
     if image is None:
         st.info("Waiting for a photo...")
         return
+
+    if not st.session_state.has_photo:
+        # First time a photo shows up: the expander above was already drawn
+        # this run (with expanded=True, since has_photo was still False when
+        # we entered it), so setting has_photo alone wouldn't visually
+        # collapse it until some later interaction. Rerun once immediately -
+        # the uploaded/captured file stays bound to its widget across the
+        # rerun, so this doesn't lose the photo, it just redraws collapsed.
+        st.session_state.has_photo = True
+        st.rerun()
 
     image = image.convert("RGB")
 
