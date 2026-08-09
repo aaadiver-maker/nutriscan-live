@@ -388,11 +388,7 @@ def main():
             box_label = top_name if top_name is not None else coco_label
             box_conf = top_conf if top_conf is not None else det_conf
             st.image(draw_box(image, box, box_label, box_conf), use_container_width=True)
-            st.caption(
-                f"{det_conf:.0%} is how sure the system was that it spotted food "
-                "here, not what food it is. The food name and its own confidence "
-                "are on the right."
-            )
+            st.caption("This box just shows where the food is. The food name and confidence are on the right.")
         else:
             st.image(image, use_container_width=True)
             st.caption("Analyzed the full photo directly. No crop was needed for this one.")
