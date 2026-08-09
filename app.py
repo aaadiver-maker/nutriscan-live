@@ -298,7 +298,10 @@ def main():
     # lagging a run behind - Streamlit executes top-to-bottom in one pass,
     # so rendering an icon's border before checking whether ITS OWN or the
     # OTHER icon's button was just clicked would use last run's state.
-    icon_col1, icon_col2 = st.columns(2)
+    # Narrow columns so the two icons sit close together on the left instead
+    # of each being centered in its own half of the full page width, which
+    # left a large empty gap between them.
+    icon_col1, icon_col2, _icon_spacer = st.columns([1, 1, 4])
     with icon_col1:
         upload_slot = st.empty()
         if st.button(" ", key="select_upload", use_container_width=True):
