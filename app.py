@@ -187,8 +187,9 @@ def render_icon(path, active):
     b64 = get_base64_icon(path, os.path.getmtime(path))
     border = f"3px solid {ACCENT_COLOR}" if active else "3px solid transparent"
     st.markdown(
+        f'<div style="display:flex; justify-content:center;">'
         f'<img src="data:image/png;base64,{b64}" '
-        f'style="width:100%; border:{border}; border-radius:8px;">',
+        f'style="width:100%; max-width:180px; border:{border}; border-radius:8px;"></div>',
         unsafe_allow_html=True,
     )
 
@@ -275,15 +276,25 @@ def main():
     if "input_mode" not in st.session_state:
         st.session_state.input_mode = "upload"
 
+    # Buttons are processed FIRST, before either icon is drawn, so the
+    # active-state border reflects this click immediately rather than
+    # lagging a run behind - Streamlit executes top-to-bottom in one pass,
+    # so rendering an icon's border before checking whether ITS OWN or the
+    # OTHER icon's button was just clicked would use last run's state.
     icon_col1, icon_col2 = st.columns(2)
     with icon_col1:
-        render_icon(UPLOAD_ICON_PATH, st.session_state.input_mode == "upload")
+        upload_slot = st.empty()
         if st.button(" ", key="select_upload", use_container_width=True):
             st.session_state.input_mode = "upload"
     with icon_col2:
-        render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
+        camera_slot = st.empty()
         if st.button(" ", key="select_camera", use_container_width=True):
             st.session_state.input_mode = "camera"
+
+    with upload_slot:
+        render_icon(UPLOAD_ICON_PATH, st.session_state.input_mode == "upload")
+    with camera_slot:
+        render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
 
     image = None
     if st.session_state.input_mode == "upload":
