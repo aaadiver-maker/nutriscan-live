@@ -389,9 +389,9 @@ def main():
             box_conf = top_conf if top_conf is not None else det_conf
             st.image(draw_box(image, box, box_label, box_conf), use_container_width=True)
             st.caption(
-                f"Box location found automatically ({det_conf:.0%} confidence). "
-                "That's a separate, earlier step from identifying the food, "
-                "which is what the Result panel's confidence is about."
+                f"{det_conf:.0%} is how sure the system was that it spotted food "
+                "here, not what food it is. The food name and its own confidence "
+                "are on the right."
             )
         else:
             st.image(image, use_container_width=True)
