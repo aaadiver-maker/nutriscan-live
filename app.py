@@ -397,7 +397,7 @@ def main():
             nutrition_info = NUTRITION_MAP.get(class_names[top_idx])
             if nutrition_info:
                 kcal, serving, protein_g, carbs_g, fat_g = nutrition_info
-                st.markdown(f"**~{kcal} kcal** ({serving}, estimated)")
+                st.markdown(f"**~{kcal} kcal** per typical serving ({serving})")
                 st.markdown(f"• Protein {protein_g}g&nbsp;&nbsp;&nbsp;• Carbs {carbs_g}g&nbsp;&nbsp;&nbsp;• Fat {fat_g}g")
             else:
                 st.caption("Nutrition estimate not available for this food type.")
