@@ -210,7 +210,7 @@ def main():
            text inside buttons and progress bars to the point of being
            unreadable. Keep this narrow. */
         [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
-            color: #64748B;
+            color: #323A45;
         }
         [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
             font-family: Cambria, Georgia, serif;
