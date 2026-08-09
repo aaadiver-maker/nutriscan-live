@@ -371,7 +371,7 @@ def main():
             st.caption(f"Located automatically (detector confidence {det_conf:.0%}).")
         else:
             st.image(image, use_container_width=True)
-            st.caption("Couldn't confidently locate the food, so the full photo was used.")
+            st.caption("Analyzed the full photo directly — no crop was needed for this one.")
 
     crop = image.crop(box) if box is not None else image
 
