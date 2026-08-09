@@ -158,16 +158,16 @@ def main():
 
     class_names = load_class_names()
 
-    tab_camera, tab_upload = st.tabs(["📷 Take a photo", "🖼️ Upload a photo"])
+    tab_upload, tab_camera = st.tabs(["🖼️ Upload a photo", "📷 Take a photo"])
     image = None
-    with tab_camera:
-        cam_file = st.camera_input("Point at your meal")
-        if cam_file is not None:
-            image = Image.open(cam_file)
     with tab_upload:
         up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
         if up_file is not None:
             image = Image.open(up_file)
+    with tab_camera:
+        cam_file = st.camera_input("Point at your meal")
+        if cam_file is not None:
+            image = Image.open(cam_file)
 
     if image is None:
         st.info("Waiting for a photo...")
