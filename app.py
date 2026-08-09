@@ -178,21 +178,22 @@ def get_base64_icon(path, _mtime):
         return base64.b64encode(f.read()).decode()
 
 
-def clickable_icon(path, mode, active):
+def render_icon(path, active):
+    # Plain <img>, no <a href> - an anchor-tag click forces the browser to
+    # do a full page reload (new HTTP request, new Streamlit session setup),
+    # which is what made switching feel slow. The actual click handling
+    # below uses a real (CSS-hidden) st.button instead, which is a native
+    # Streamlit rerun over the existing connection - fast.
     b64 = get_base64_icon(path, os.path.getmtime(path))
     border = f"3px solid {ACCENT_COLOR}" if active else "3px solid transparent"
     st.markdown(
-        f'<a href="?mode={mode}" target="_self" class="nutriscan-icon-link">'
-        f'<img src="data:image/png;base64,{b64}" style="border:{border};"></a>',
+        f'<img src="data:image/png;base64,{b64}" '
+        f'style="width:100%; border:{border}; border-radius:8px;">',
         unsafe_allow_html=True,
     )
 
 
 def main():
-    if "mode" in st.query_params:
-        st.session_state.input_mode = st.query_params["mode"]
-        st.query_params.clear()
-
     st.markdown(
         """
         <style>
@@ -224,14 +225,16 @@ def main():
         [data-testid="stProgress"] div[role="progressbar"] {
             background-color: #4A6FA1 !important;
         }
-        .nutriscan-icon-link img {
-            width: 100%;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: opacity 0.15s ease;
-        }
-        .nutriscan-icon-link img:hover {
-            opacity: 0.8;
+        /* Real (fast) buttons used as the click target for switching icons,
+           styled invisible so only the icon image above them is seen. */
+        .st-key-select_upload button, .st-key-select_camera button {
+            background-color: transparent !important;
+            border: none !important;
+            color: transparent !important;
+            height: 1.4rem !important;
+            min-height: 1.4rem !important;
+            padding: 0 !important;
+            margin-top: -0.5rem;
         }
         </style>
         """,
@@ -262,9 +265,13 @@ def main():
 
     icon_col1, icon_col2 = st.columns(2)
     with icon_col1:
-        clickable_icon(UPLOAD_ICON_PATH, "upload", st.session_state.input_mode == "upload")
+        render_icon(UPLOAD_ICON_PATH, st.session_state.input_mode == "upload")
+        if st.button(" ", key="select_upload", use_container_width=True):
+            st.session_state.input_mode = "upload"
     with icon_col2:
-        clickable_icon(CAMERA_ICON_PATH, "camera", st.session_state.input_mode == "camera")
+        render_icon(CAMERA_ICON_PATH, st.session_state.input_mode == "camera")
+        if st.button(" ", key="select_camera", use_container_width=True):
+            st.session_state.input_mode = "camera"
 
     image = None
     if st.session_state.input_mode == "upload":
