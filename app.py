@@ -388,7 +388,11 @@ def main():
             box_label = top_name if top_name is not None else coco_label
             box_conf = top_conf if top_conf is not None else det_conf
             st.image(draw_box(image, box, box_label, box_conf), use_container_width=True)
-            st.caption(f"Located automatically (detector confidence {det_conf:.0%}).")
+            st.caption(
+                f"Box location found automatically ({det_conf:.0%} confidence). "
+                "That's a separate, earlier step from identifying the food, "
+                "which is what the Result panel's confidence is about."
+            )
         else:
             st.image(image, use_container_width=True)
             st.caption("Analyzed the full photo directly. No crop was needed for this one.")
