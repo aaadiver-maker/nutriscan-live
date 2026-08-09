@@ -26,6 +26,10 @@ MODEL_DIR = os.path.join(os.path.dirname(__file__), "model")
 CLASSIFIER_PATH = os.path.join(MODEL_DIR, "variant3_model.keras")
 LABEL_MAP_PATH = os.path.join(MODEL_DIR, "label_map.json")
 
+ICON_DIR = os.path.join(os.path.dirname(__file__), "icon")
+UPLOAD_ICON_PATH = os.path.join(ICON_DIR, "upload_icon.png")
+CAMERA_ICON_PATH = os.path.join(ICON_DIR, "camera_icon.png")
+
 IMG_SIZE = (224, 224)
 
 # Fallback only - matches Milestone 1's `sorted(os.listdir(data_root))`.
@@ -193,13 +197,31 @@ def main():
 
     class_names = load_class_names()
 
-    tab_upload, tab_camera = st.tabs(["🖼️ Upload a photo", "📷 Take a photo"])
+    if "input_mode" not in st.session_state:
+        st.session_state.input_mode = "upload"
+
+    icon_col1, icon_col2 = st.columns(2)
+    with icon_col1:
+        st.image(UPLOAD_ICON_PATH, use_container_width=True)
+        if st.button(
+            "Upload a photo", use_container_width=True,
+            type="primary" if st.session_state.input_mode == "upload" else "secondary",
+        ):
+            st.session_state.input_mode = "upload"
+    with icon_col2:
+        st.image(CAMERA_ICON_PATH, use_container_width=True)
+        if st.button(
+            "Take a photo", use_container_width=True,
+            type="primary" if st.session_state.input_mode == "camera" else "secondary",
+        ):
+            st.session_state.input_mode = "camera"
+
     image = None
-    with tab_upload:
+    if st.session_state.input_mode == "upload":
         up_file = st.file_uploader("Choose an image", type=["jpg", "jpeg", "png"])
         if up_file is not None:
             image = Image.open(up_file)
-    with tab_camera:
+    else:
         cam_file = st.camera_input("Point at your meal")
         if cam_file is not None:
             image = Image.open(cam_file)
