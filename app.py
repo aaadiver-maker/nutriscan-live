@@ -278,7 +278,7 @@ def main():
         '</div>',
         unsafe_allow_html=True,
     )
-    st.caption("Photo in. Meal logged. — take or upload a photo of your food.")
+    st.caption("Photo in. Meal logged. Take or upload a photo of your food.")
 
     classifier = load_classifier()
     if classifier is None:
@@ -370,19 +370,19 @@ def main():
             st.image(draw_box(image, box, coco_label, det_conf), use_container_width=True)
             st.caption(f"Located automatically (detector confidence {det_conf:.0%}).")
             st.caption(
-                "This box just shows where the food is — not what it is. "
+                "This box just shows where the food is, not what it is. "
                 "The food name on the right comes from a second, more accurate check."
             )
         else:
             st.image(image, use_container_width=True)
-            st.caption("Analyzed the full photo directly — no crop was needed for this one.")
+            st.caption("Analyzed the full photo directly. No crop was needed for this one.")
 
     crop = image.crop(box) if box is not None else image
 
     with col2:
         st.subheader("Result")
         if classifier is None:
-            st.error("Classifier not loaded — see warning above.")
+            st.error("Classifier not loaded. See warning above.")
         else:
             with st.spinner("Identifying the food..."):
                 batch = preprocess_for_classifier(crop)
@@ -403,7 +403,7 @@ def main():
             order = np.argsort(probs)[::-1][:3]
             st.caption("Other possibilities")
             for i in order:
-                st.progress(float(probs[i]), text=f"{format_class_name(class_names[i])} — {probs[i]:.0%}")
+                st.progress(float(probs[i]), text=f"{format_class_name(class_names[i])}: {probs[i]:.0%}")
 
     st.divider()
     st.caption(
