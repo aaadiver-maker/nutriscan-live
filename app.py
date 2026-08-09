@@ -19,7 +19,7 @@ import tempfile
 
 import numpy as np
 import streamlit as st
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 st.set_page_config(page_title="NutriScan Scanner", page_icon="🍽️", layout="centered")
 
@@ -128,14 +128,37 @@ def preprocess_for_classifier(pil_img):
     return np.expand_dims(arr, axis=0)
 
 
+NEON_GREEN = "#39FF14"
+
+
 def draw_box(pil_img, box, label, conf_score):
     annotated = pil_img.copy()
     draw = ImageDraw.Draw(annotated)
     x1, y1, x2, y2 = box
-    draw.rectangle([x1, y1, x2, y2], outline="#4A6FA1", width=max(3, pil_img.width // 200))
+
+    line_width = max(3, pil_img.width // 200)
+    draw.rectangle([x1, y1, x2, y2], outline=NEON_GREEN, width=line_width)
+
     tag = f"{label} {conf_score:.2f}"
-    draw.rectangle([x1, y1 - 22, x1 + 9 * len(tag), y1], fill="#4A6FA1")
-    draw.text((x1 + 3, y1 - 20), tag, fill="white")
+    font_size = max(14, pil_img.width // 30)
+    font = ImageFont.load_default(size=font_size)
+
+    # Measure the actual rendered text instead of guessing pixels-per-character,
+    # so the label background always fits the text regardless of font/length.
+    text_bbox = draw.textbbox((0, 0), tag, font=font)
+    text_w = text_bbox[2] - text_bbox[0]
+    text_h = text_bbox[3] - text_bbox[1]
+    pad = max(2, font_size // 6)
+
+    tag_top = y1 - text_h - 2 * pad
+    if tag_top < 0:
+        # Not enough room above the box (it's near the top edge of the photo) -
+        # draw the label just inside the box instead of letting it clip off-frame.
+        tag_top = y1
+    tag_bottom = tag_top + text_h + 2 * pad
+
+    draw.rectangle([x1, tag_top, x1 + text_w + 2 * pad, tag_bottom], fill=NEON_GREEN)
+    draw.text((x1 + pad, tag_top + pad - text_bbox[1]), tag, fill="black", font=font)
     return annotated
 
 
