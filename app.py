@@ -369,6 +369,11 @@ def main():
         if box is not None:
             st.image(draw_box(image, box, coco_label, det_conf), use_container_width=True)
             st.caption(f"Located automatically (detector confidence {det_conf:.0%}).")
+            st.caption(
+                "This box only finds *where* the food is — the label on it can be "
+                "approximate. The *Result* panel, from a separate model trained "
+                "specifically on our food types, is what actually identifies it."
+            )
         else:
             st.image(image, use_container_width=True)
             st.caption("Analyzed the full photo directly — no crop was needed for this one.")
