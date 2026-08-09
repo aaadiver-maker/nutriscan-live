@@ -10,6 +10,7 @@ Reproduces the exact Milestone 1 / Milestone 2 pipeline for a single photo:
 
 Run with:  streamlit run app.py
 """
+import base64
 import json
 import os
 import subprocess
@@ -142,7 +143,26 @@ def format_class_name(name):
     return name.replace("_", " ").title()
 
 
+@st.cache_data
+def get_base64_icon(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+def clickable_icon(path, mode):
+    b64 = get_base64_icon(path)
+    st.markdown(
+        f'<a href="?mode={mode}" target="_self" class="nutriscan-icon-link">'
+        f'<img src="data:image/png;base64,{b64}"></a>',
+        unsafe_allow_html=True,
+    )
+
+
 def main():
+    if "mode" in st.query_params:
+        st.session_state.input_mode = st.query_params["mode"]
+        st.query_params.clear()
+
     st.markdown(
         """
         <style>
@@ -173,6 +193,21 @@ def main():
         [data-testid="stProgress"] > div > div {
             background-color: #4A6FA1 !important;
         }
+        button[kind="primary"] p, button[kind="primary"] span {
+            color: #FFFFFF !important;
+        }
+        button[kind="secondary"] p, button[kind="secondary"] span {
+            color: #1E293B !important;
+        }
+        .nutriscan-icon-link img {
+            width: 100%;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: opacity 0.15s ease;
+        }
+        .nutriscan-icon-link img:hover {
+            opacity: 0.8;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -202,14 +237,14 @@ def main():
 
     icon_col1, icon_col2 = st.columns(2)
     with icon_col1:
-        st.image(UPLOAD_ICON_PATH, use_container_width=True)
+        clickable_icon(UPLOAD_ICON_PATH, "upload")
         if st.button(
             "Upload a photo", use_container_width=True,
             type="primary" if st.session_state.input_mode == "upload" else "secondary",
         ):
             st.session_state.input_mode = "upload"
     with icon_col2:
-        st.image(CAMERA_ICON_PATH, use_container_width=True)
+        clickable_icon(CAMERA_ICON_PATH, "camera")
         if st.button(
             "Take a photo", use_container_width=True,
             type="primary" if st.session_state.input_mode == "camera" else "secondary",
