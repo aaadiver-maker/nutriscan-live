@@ -127,9 +127,9 @@ def draw_box(pil_img, box, label, conf_score):
     annotated = pil_img.copy()
     draw = ImageDraw.Draw(annotated)
     x1, y1, x2, y2 = box
-    draw.rectangle([x1, y1, x2, y2], outline="#4472A8", width=max(3, pil_img.width // 200))
+    draw.rectangle([x1, y1, x2, y2], outline="#4A6FA1", width=max(3, pil_img.width // 200))
     tag = f"{label} {conf_score:.2f}"
-    draw.rectangle([x1, y1 - 22, x1 + 9 * len(tag), y1], fill="#4472A8")
+    draw.rectangle([x1, y1 - 22, x1 + 9 * len(tag), y1], fill="#4A6FA1")
     draw.text((x1 + 3, y1 - 20), tag, fill="white")
     return annotated
 
@@ -140,9 +140,44 @@ def format_class_name(name):
 
 def main():
     st.markdown(
+        """
+        <style>
+        html, body, [class*="css"] {
+            font-family: Calibri, "Segoe UI", Helvetica, Arial, sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: Cambria, Georgia, serif !important;
+            color: #1E293B !important;
+        }
+        p, span, label, [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {
+            color: #64748B;
+        }
+        [data-testid="stMetricValue"], [data-testid="stMetricLabel"] {
+            font-family: Cambria, Georgia, serif;
+            color: #1E293B;
+        }
+        [data-testid="stTabs"] button[aria-selected="true"] p {
+            color: #4A6FA1 !important;
+        }
+        [data-testid="stTabs"] button[aria-selected="true"] {
+            border-bottom-color: #4A6FA1 !important;
+        }
+        [data-testid="stAlertContainer"] {
+            background-color: #F1F4F8;
+            border-radius: 8px;
+        }
+        [data-testid="stProgress"] > div > div {
+            background-color: #4A6FA1 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.markdown(
         '<div style="display:flex; align-items:baseline; gap:0.6rem;">'
-        '<span style="font-size:2.25rem; font-weight:700; line-height:1;">NutriScan</span>'
-        '<span style="font-size:1.125rem; font-weight:400; color:#808495;">by: Gan CM</span>'
+        '<span style="font-family:Cambria, Georgia, serif; font-size:2.25rem; font-weight:700; '
+        'line-height:1; color:#1E293B;">NutriScan</span>'
+        '<span style="font-size:1.125rem; font-weight:400; color:#64748B;">by: Gan CM</span>'
         '</div>',
         unsafe_allow_html=True,
     )
