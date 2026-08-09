@@ -47,25 +47,26 @@ DEFAULT_CLASS_NAMES = [
 DETECT_WORKER_PATH = os.path.join(os.path.dirname(__file__), "detect_worker.py")
 
 # Reference lookup, NOT a model output - the classifier predicts food type
-# only. Approximate kcal per typical single serving (USDA-style estimates).
-CALORIE_MAP = {
-    "apple_pie": (296, "1 slice, ~125g"),
-    "chocolate_cake": (371, "1 slice, ~95g"),
-    "donuts": (253, "1 glazed donut"),
-    "falafel": (333, "1 serving, ~4 pieces"),
-    "french_fries": (365, "1 medium serving"),
-    "hot_dog": (290, "1 hot dog with bun"),
-    "ice_cream": (207, "1/2 cup"),
-    "nachos": (346, "1 serving with cheese"),
-    "onion_rings": (411, "1 serving, ~8 rings"),
-    "pancakes": (350, "1 stack, 3 pancakes"),
-    "pizza": (285, "1 slice"),
-    "ravioli": (330, "1 cup, cheese-filled"),
-    "samosa": (262, "1 samosa"),
-    "spring_rolls": (150, "1 roll, fried"),
-    "strawberry_shortcake": (344, "1 slice"),
-    "tacos": (226, "1 taco"),
-    "waffles": (218, "1 waffle"),
+# only. Approximate values per typical single serving (USDA-style estimates).
+# Fields: kcal, serving description, protein_g, carbs_g, fat_g.
+NUTRITION_MAP = {
+    "apple_pie": (296, "1 slice, ~125g", 2.4, 42, 14),
+    "chocolate_cake": (371, "1 slice, ~95g", 5, 50, 18),
+    "donuts": (253, "1 glazed donut", 4, 31, 14),
+    "falafel": (333, "1 serving, ~4 pieces", 13, 31, 18),
+    "french_fries": (365, "1 medium serving", 4, 48, 17),
+    "hot_dog": (290, "1 hot dog with bun", 10, 24, 17),
+    "ice_cream": (207, "1/2 cup", 3.5, 24, 11),
+    "nachos": (346, "1 serving with cheese", 9, 36, 19),
+    "onion_rings": (411, "1 serving, ~8 rings", 5, 44, 23),
+    "pancakes": (350, "1 stack, 3 pancakes", 9, 50, 12),
+    "pizza": (285, "1 slice", 12, 36, 10),
+    "ravioli": (330, "1 cup, cheese-filled", 14, 40, 12),
+    "samosa": (262, "1 samosa", 4, 28, 15),
+    "spring_rolls": (150, "1 roll, fried", 3, 15, 9),
+    "strawberry_shortcake": (344, "1 slice", 4, 48, 16),
+    "tacos": (226, "1 taco", 9, 20, 12),
+    "waffles": (218, "1 waffle", 6, 25, 10),
 }
 
 
@@ -393,12 +394,13 @@ def main():
 
             st.metric(top_name, f"{top_conf:.0%} confidence")
 
-            calorie_info = CALORIE_MAP.get(class_names[top_idx])
-            if calorie_info:
-                kcal, serving = calorie_info
-                st.markdown(f"**~{kcal} kcal** <span style='color:#808495;'>({serving}, estimated)</span>", unsafe_allow_html=True)
+            nutrition_info = NUTRITION_MAP.get(class_names[top_idx])
+            if nutrition_info:
+                kcal, serving, protein_g, carbs_g, fat_g = nutrition_info
+                st.markdown(f"**~{kcal} kcal** ({serving}, estimated)")
+                st.caption(f"Protein {protein_g}g • Carbs {carbs_g}g • Fat {fat_g}g")
             else:
-                st.caption("Calorie estimate not available for this food type.")
+                st.caption("Nutrition estimate not available for this food type.")
 
             order = np.argsort(probs)[::-1][:3]
             st.caption("Other possibilities")
