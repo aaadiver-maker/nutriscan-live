@@ -17,7 +17,6 @@ import sys
 from dataclasses import dataclass, field
 
 import numpy as np
-import pandas as pd
 import yfinance as yf
 
 RECOMMENDATIONS = ["Strong Sell", "Sell", "Hold", "Buy", "Strong Buy"]
@@ -78,6 +77,9 @@ def compute_rsi(closes, window=14):
     avg_loss = loss.rolling(window).mean()
     rs = avg_gain / avg_loss.replace(0, np.nan)
     rsi = 100 - (100 / (1 + rs))
+    # A window with no losing days gives avg_loss == 0, which the divide
+    # above turns into NaN rather than the conventional RSI of 100.
+    rsi = rsi.where(avg_loss != 0, 100.0)
     return rsi
 
 
